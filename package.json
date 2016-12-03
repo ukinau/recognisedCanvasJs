@@ -1,0 +1,24 @@
+{
+  "name": "recognised-canvasjs",
+  "version": "1.0.0",
+  "description": "This is simplest javascript library for drawing the recognisable object on Canvas. The main concept is to make it easier following points",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ukinau/recognisedCanvasJs.git"
+  },
+  "author": "Yuki Nishiwaki",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ukinau/recognisedCanvasJs/issues"
+  },
+  "homepage": "https://github.com/ukinau/recognisedCanvasJs#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-uglify": "^2.0.0"
+  }
+}
