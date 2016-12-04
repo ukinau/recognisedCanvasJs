@@ -16,6 +16,9 @@ The main concept is to make it easier following points
 # How to Use it
 ## TODO
 
+## Sample
+![released](docs/released_1.0.gif)
+
 # Used by 
  * [Container Visualise](https://github.com/ukinau/container-visualise)
 ![container visualise image](https://raw.githubusercontent.com/ukinau/container-visualise/master/samples/container_visualise_0.5.gif)
