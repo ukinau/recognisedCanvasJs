@@ -4,13 +4,13 @@
 var DrawConnectionObject = function(from, to, options){
   this.from = from
   this.to = to
-  if(options.title){
-    this.canvas = new ArrowConnectionWithTitle(options.title)
+  this.options = (typeof(options) == "object")? options: {}
+  if(this.options.title){
+    this.canvas = new ArrowConnectionWithTitle(this.options.title)
   }else{
     this.canvas = new ArrowConnection()
   }
   this.unHighlight()
-  this.options = {}
 }
 
 DrawConnectionObject.prototype.calculate = function(){
