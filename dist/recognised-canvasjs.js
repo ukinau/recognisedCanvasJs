@@ -143,8 +143,9 @@ ArrowConnectionWithTitle.prototype.draw = function(ctx){
 }
 
 inherits(ArrowConnectionWithTitle, ArrowConnection)
-;var SquareWithTitle = function(text){ 
+;var SquareWithTitle = function(text, options){
   BaseCanvasModel.call(this)
+
   this.color = 'rgb(155, 187, 89)'
   this.globalAlpha = 1.0
   this.radius = 15
@@ -153,6 +154,24 @@ inherits(ArrowConnectionWithTitle, ArrowConnection)
   this.lineFlag = false // line is needed or not
   this.title = new TextCanvasModel(text)
   this.title_vertical_align = "center" //"center" or "bottom"
+
+  if(options){
+    var d_option_list = [["x", "possitionX"], ["y", "possitionY"],
+                       ["width", "width"], ["height", "height"],
+                       ["color", "color"], ["globalAlpha", "globalAlpha"]]
+    for(var i=0; i<d_option_list.length; i++){
+      if(options[d_option_list[i][0]]){
+        this[d_option_list[i][1]] = options[d_option_list[i][0]]
+      }
+    }
+    var text_option_list = [["text-color", "color"], ["text-font", "font"],
+                            ["text-globalAlpha", "globalAlpha"]]
+    for(var i=0; i<text_option_list.length; i++){
+      if(options[text_option_list[i][0]]){
+        this.title[text_option_list[i][1]] = options[text_option_list[i][0]]
+      }
+    }
+  }
 }
 SquareWithTitle.prototype.calculate = function(){
   // center align
@@ -477,7 +496,7 @@ function comparedVector(left, right, operator){
 
 function randomNum(from, to){
   var range = to - from
-  return from + Math.random() * range  
+  return from + Math.random() * range
 }
 ;/** DrawConnectionObject Class
 
@@ -524,15 +543,16 @@ DrawConnectionObject.prototype.unHighlight = function(){
 ;/** DrawObject Class
   Args:
     name(str): this object name, this isn't identifier and unique      
-    obj({}): 
+    options({}):
 **/
-var DrawObject = function(name, obj){
+var DrawObject = function(id, canvasObj, options){
   // super object, we don't need to specify the x,y,width...
   this.super_draw_object = null
   this.super_draw_margin = 28
   this.children_draw_objects = []
-  this.name = name
-  this.options = obj
+  this.id = id
+  this.options = (typeof(options) == 'object')? options:{}
+  this.canvas = canvasObj
 
   /**
     {
@@ -550,34 +570,11 @@ var DrawObject = function(name, obj){
   }
   this.connecting_points_space = 10 // point <10> point <10>
   this.connections = []
-
   this.event_functions = {
     "mousedown": null,
     "mousedown:clear": null,
     "mousemove": null,
     "mousemove:clear": null
-  }
-  this.canvas = new SquareWithTitle(name)
-  if(obj){
-    var d_option_list = [["x", "possitionX"],
-                       ["y", "possitionY"],
-                       ["width", "width"],
-                       ["height", "height"],
-                       ["color", "color"],
-                        ["globalAlpha", "globalAlpha"]]
-    for(var i=0; i<d_option_list.length; i++){
-      if(obj[d_option_list[i][0]]){
-        this.canvas[d_option_list[i][1]] = obj[d_option_list[i][0]]
-      }
-    }
-    var text_option_list = [["text-color", "color"],
-                            ["text-font", "font"],
-                            ["text-globalAlpha", "globalAlpha"]]
-    for(var i=0; i<text_option_list.length; i++){
-      if(obj[text_option_list[i][0]]){
-        this.canvas.title[text_option_list[i][1]] = obj[text_option_list[i][0]]
-      }
-    }
   }
 }
 

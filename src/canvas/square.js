@@ -1,5 +1,6 @@
-var SquareWithTitle = function(text){ 
+var SquareWithTitle = function(text, options){
   BaseCanvasModel.call(this)
+
   this.color = 'rgb(155, 187, 89)'
   this.globalAlpha = 1.0
   this.radius = 15
@@ -8,6 +9,24 @@ var SquareWithTitle = function(text){
   this.lineFlag = false // line is needed or not
   this.title = new TextCanvasModel(text)
   this.title_vertical_align = "center" //"center" or "bottom"
+
+  if(options){
+    var d_option_list = [["x", "possitionX"], ["y", "possitionY"],
+                       ["width", "width"], ["height", "height"],
+                       ["color", "color"], ["globalAlpha", "globalAlpha"]]
+    for(var i=0; i<d_option_list.length; i++){
+      if(options[d_option_list[i][0]]){
+        this[d_option_list[i][1]] = options[d_option_list[i][0]]
+      }
+    }
+    var text_option_list = [["text-color", "color"], ["text-font", "font"],
+                            ["text-globalAlpha", "globalAlpha"]]
+    for(var i=0; i<text_option_list.length; i++){
+      if(options[text_option_list[i][0]]){
+        this.title[text_option_list[i][1]] = options[text_option_list[i][0]]
+      }
+    }
+  }
 }
 SquareWithTitle.prototype.calculate = function(){
   // center align
