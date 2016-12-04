@@ -1,10 +1,14 @@
 /** DrawConnectionObject Class
 
 **/
-var DrawConnectionObject = function(from, to){
+var DrawConnectionObject = function(from, to, options){
   this.from = from
   this.to = to
-  this.canvas = new ArrowConnection()
+  if(options.title){
+    this.canvas = new ArrowConnectionWithTitle(options.title)
+  }else{
+    this.canvas = new ArrowConnection()
+  }
   this.unHighlight()
   this.options = {}
 }
@@ -13,6 +17,7 @@ DrawConnectionObject.prototype.calculate = function(){
       //[x, y] array
   this.canvas.begin_possition = this.from.get_connecting_point(this.to)
   this.canvas.end_possition = this.to.get_connecting_point(this.from)
+  this.canvas.calculate()
 }
 
 DrawConnectionObject.prototype.highlight = function(options){

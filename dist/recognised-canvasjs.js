@@ -29,10 +29,25 @@ BaseCanvasModel.prototype.collision_detect = function(x,y){
   this.z_index = 99 //TODO temporally max higher value
 }
 
+ConnectionBaseCanvas.prototype.calculate = function(){
+}
+ConnectionBaseCanvas.prototype.ctx_stash = function(ctx){
+  stash = {}
+  stash.globalAlpha = ctx.globalAlpha
+  stash.lineWidth = ctx.lineWidth
+  stash.strokeStyle = ctx.strokeStyle
+  stash.fillStyle = ctx.fillStyle
+  return stash
+}
+ConnectionBaseCanvas.prototype.ctx_reset = function(ctx, stash){
+  ctx.globalAlpha = stash.globalAlpha
+  ctx.lineWidth = stash.lineWidth
+  ctx.strokeStyle = stash.strokeStyle
+  ctx.fillStyle = stash.fillStyle
+}
+
 ConnectionBaseCanvas.prototype.draw = function(ctx){
-  var tmp_globalAlpha = ctx.globalAlpha
-  var tmp_lineWidth = ctx.lineWidth 
-  var tmp_strokeStyle = ctx.strokeStyle
+  stashed = this.ctx_stash(ctx)
   ctx.globalAlpha = this.globalAlpha
   ctx.lineWidth = this.lineWidth
   ctx.strokeStyle = this.strokeStyle
@@ -43,10 +58,7 @@ ConnectionBaseCanvas.prototype.draw = function(ctx){
   ctx.lineTo(this.end_possition[0],
              this.end_possition[1])
   ctx.stroke()
-
-  ctx.globalAlpha = tmp_globalAlpha
-  ctx.lineWidth = tmp_lineWidth
-  ctx.strokeStyle = tmp_strokeStyle
+  this.ctx_reset(ctx, stashed)
 }
 ConnectionBaseCanvas.prototype.collision_detect = function(x, y){
   return false
@@ -62,7 +74,6 @@ ArrowConnection.prototype.draw = function(ctx){
   this.end_possition[0] = Number(this.end_possition[0])
   this.end_possition[1] = Number(this.end_possition[1])
   var left_possitions = []
-  var right_possitions = []
   var original_end_possition = this.end_possition
   this.end_possition = []
 
@@ -70,14 +81,15 @@ ArrowConnection.prototype.draw = function(ctx){
            0, this.arrow_height, left_possitions, [])
   this.end_possition[0] = Number(left_possitions[0])
   this.end_possition[1] = Number(left_possitions[1])
-  Object.getPrototypeOf(ArrowConnection.prototype).draw.call(this, ctx)
+  ConnectionBaseCanvas.prototype.draw.call(this, ctx)
   this.end_possition = original_end_possition
+  this.draw_arrow(ctx)
+}
 
-  var tmp_globalAlpha = ctx.globalAlpha
-  var tmp_lineWidth = ctx.lineWidth
-  var tmp_strokeStyle = ctx.strokeStyle
-  var tmp_fillStyle = ctx.fillStyle
-
+ArrowConnection.prototype.draw_arrow = function(ctx){
+  var left_possitions = []
+  var right_possitions = []
+  stashed = this.ctx_stash(ctx)
   ctx.globalAlpha = this.globalAlpha
   ctx.lineWidth = this.lineWidth
   ctx.strokeStyle = this.strokeStyle
@@ -91,29 +103,46 @@ ArrowConnection.prototype.draw = function(ctx){
   ctx.lineTo(left_possitions[0], left_possitions[1])
   ctx.lineTo(right_possitions[0], right_possitions[1])
   ctx.fill()
-
-  ctx.globalAlpha = tmp_globalAlpha
-  ctx.lineWidth = tmp_lineWidth
-  ctx.strokeStyle = tmp_strokeStyle
-  ctx.fillStyle = tmp_fillStyle
+  this.ctx_reset(ctx, stashed)
 }
-
-
-
 inherits(ArrowConnection, ConnectionBaseCanvas)
 
 
-function arrowPos(A,B,w,h,L,R){ //A,B,L,Rは[0]:x [1]:y
-  var Vx= B[0]-A[0];
-  var Vy= B[1]-A[1];
-  var v = Math.sqrt(Vx*Vx+Vy*Vy);
-  var Ux= Vx/v;
-  var Uy= Vy/v;
-  L[0]= B[0] - Uy*w - Ux*h;
-  L[1]= B[1] + Ux*w - Uy*h;
-  R[0]= B[0] + Uy*w - Ux*h;
-  R[1]= B[1] - Ux*w - Uy*h;
+var ArrowConnectionWithTitle = function(name){
+  ArrowConnection.call(this)
+  this.title = new TextCanvasModel(name)
+  this.title_seed_possition = randomNum(1.4, 3)
 }
+ArrowConnectionWithTitle.prototype.draw = function(ctx){
+  this.end_possition[0] = Number(this.end_possition[0])
+  this.end_possition[1] = Number(this.end_possition[1])
+  this.begin_possition[0] = Number(this.begin_possition[0])
+  this.begin_possition[1] = Number(this.begin_possition[1])
+  var original_end_possition = this.end_possition
+  var original_begin_possition = this.begin_possition
+  var half_vector = vectorDividedBy(this.begin_possition,
+                                    this.end_possition, this.title_seed_possition)
+  var middle_end_possition = addVector(this.begin_possition, half_vector)
+  var m_minus_character = subtractedVector(this.begin_possition,
+                                           middle_end_possition,
+                                           13, this.begin_possition)
+  var m_plus_character = extendVector(this.begin_possition,
+                                   middle_end_possition, 13,
+                                   this.end_possition)
+  this.end_possition = m_minus_character
+  ConnectionBaseCanvas.prototype.draw.call(this, ctx)
+  this.begin_possition = m_plus_character
+  this.end_possition = original_end_possition
+  ArrowConnection.prototype.draw.call(this, ctx)
+
+  this.title.possitionY = middle_end_possition[1] + 3 //Adjustment
+  var m_left = this.title.get_px_width()/2
+  this.title.possitionX = middle_end_possition[0] - m_left
+  this.title.z_index = this.z_index
+  this.title.draw(ctx)
+}
+
+inherits(ArrowConnectionWithTitle, ArrowConnection)
 ;var SquareWithTitle = function(text){ 
   BaseCanvasModel.call(this)
   this.color = 'rgb(155, 187, 89)'
@@ -365,13 +394,102 @@ inherits(TextCanvasModel, BaseCanvasModel)
 //    }
 //  });
 }
+
+function arrowPos(A,B,w,h,L,R){ //A,B,L,Rは[0]:x [1]:y
+  var unitVector = getUniVector(A, B)
+  Ux = unitVector[0]
+  Uy = unitVector[1]
+  L[0]= B[0] - Uy*w - Ux*h;
+  L[1]= B[1] + Ux*w - Uy*h;
+  R[0]= B[0] + Uy*w - Ux*h;
+  R[1]= B[1] - Ux*w - Uy*h;
+}
+
+function getVector(start, end){
+  var Vx = end[0] - start[0]
+  var Vy = end[1] - start[1]
+  return [Vx, Vy]
+}
+
+function getUniVector(start, end){
+  var V = getVector(start, end)
+  var Vx = V[0]
+  var Vy = V[1]
+  var v = Math.sqrt(Vx*Vx+Vy*Vy);
+  var Ux= Vx/v;
+  var Uy= Vy/v;
+  var result = [Ux, Uy]
+  return result
+}
+
+function vectorDividedBy(start, end, division){
+  var result = []
+  var V = getVector(start, end)
+  var Vrx = V[0] / division
+  var Vry = V[1] / division
+  return [Vrx, Vry]
+}
+
+function addVector(org, add){
+  var result = []
+  result[0] = org[0] + add[0]
+  result[1] = org[1] + add[1]
+  return result
+}
+
+function extendVector(start, end, add, limit){
+  var unitVector = getUniVector(start, end)
+  var result = []
+  result[0] = end[0] + unitVector[0] * add
+  result[1] = end[1] + unitVector[1] * add
+  Vlimit = getVector(start, limit)
+  Vresult = getVector(start, result)
+  if(comparedVector(Vlimit, Vresult, '<')){
+    return limit
+  }
+  return result
+}
+
+function subtractedVector(start, end, sub, limit){
+  var unitVector = getUniVector(start, end)
+  var result = []
+  result[0] = end[0] - unitVector[0] * sub
+  result[1] = end[1]- unitVector[1] * sub
+  Vsub = [unitVector[0] * sub, unitVector[1] * sub]
+  Vorg = getVector(start, end)
+  if(comparedVector(Vsub, Vorg, '>')){
+    return limit
+  }
+  return result
+}
+
+function comparedVector(left, right, operator){
+  var l = Math.sqrt(left[0]*left[0] + left[1]*left[1]);
+  var r = Math.sqrt(right[0]*right[0] + right[1]*right[1]);
+  if(operator == '>') {
+    if(l>r){ return true }else{ return false }
+  } else if (operator == '<') {
+    if(l<r){ return true }else{ return false }
+  } else {
+    if(l==r){ return true }else{ return false }
+  }
+}
+
+function randomNum(from, to){
+  var range = to - from
+  return from + Math.random() * range  
+}
 ;/** DrawConnectionObject Class
 
 **/
-var DrawConnectionObject = function(from, to){
+var DrawConnectionObject = function(from, to, options){
   this.from = from
   this.to = to
-  this.canvas = new ArrowConnection()
+  if(options.title){
+    this.canvas = new ArrowConnectionWithTitle(options.title)
+  }else{
+    this.canvas = new ArrowConnection()
+  }
   this.unHighlight()
   this.options = {}
 }
@@ -380,6 +498,7 @@ DrawConnectionObject.prototype.calculate = function(){
       //[x, y] array
   this.canvas.begin_possition = this.from.get_connecting_point(this.to)
   this.canvas.end_possition = this.to.get_connecting_point(this.from)
+  this.canvas.calculate()
 }
 
 DrawConnectionObject.prototype.highlight = function(options){
@@ -735,8 +854,8 @@ DrawObject.prototype.add_connection = function(drawConObj){
   this.connections.push(drawConObj)
 }
 
-DrawObject.prototype.add_connection_to = function(drawObject){
-  drawConObj = new DrawConnectionObject(this, drawObject)
+DrawObject.prototype.add_connection_to = function(drawObject, options){
+  drawConObj = new DrawConnectionObject(this, drawObject, options)
   this.add_connection(drawConObj)
   drawObject.add_connection(drawConObj)
   return drawConObj

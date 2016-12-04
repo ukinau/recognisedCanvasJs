@@ -331,8 +331,8 @@ DrawObject.prototype.add_connection = function(drawConObj){
   this.connections.push(drawConObj)
 }
 
-DrawObject.prototype.add_connection_to = function(drawObject){
-  drawConObj = new DrawConnectionObject(this, drawObject)
+DrawObject.prototype.add_connection_to = function(drawObject, options){
+  drawConObj = new DrawConnectionObject(this, drawObject, options)
   this.add_connection(drawConObj)
   drawObject.add_connection(drawConObj)
   return drawConObj
