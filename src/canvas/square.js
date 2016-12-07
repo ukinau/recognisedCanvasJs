@@ -15,14 +15,14 @@ var SquareWithTitle = function(text, options){
                        ["width", "width"], ["height", "height"],
                        ["color", "color"], ["globalAlpha", "globalAlpha"]]
     for(var i=0; i<d_option_list.length; i++){
-      if(options[d_option_list[i][0]]){
+      if(typeof(options[d_option_list[i][0]])!="undefined"){
         this[d_option_list[i][1]] = options[d_option_list[i][0]]
       }
     }
     var text_option_list = [["text-color", "color"], ["text-font", "font"],
                             ["text-globalAlpha", "globalAlpha"], ["text-is_bold", "is_bold"]]
     for(var i=0; i<text_option_list.length; i++){
-      if(options[text_option_list[i][0]]){
+      if(typeof(options[text_option_list[i][0]])!="undefined"){
         this.title[text_option_list[i][1]] = options[text_option_list[i][0]]
       }
     }
