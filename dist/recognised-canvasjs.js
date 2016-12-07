@@ -165,7 +165,7 @@ inherits(ArrowConnectionWithTitle, ArrowConnection)
       }
     }
     var text_option_list = [["text-color", "color"], ["text-font", "font"],
-                            ["text-globalAlpha", "globalAlpha"]]
+                            ["text-globalAlpha", "globalAlpha"], ["text-is_bold", "is_bold"]]
     for(var i=0; i<text_option_list.length; i++){
       if(options[text_option_list[i][0]]){
         this.title[text_option_list[i][1]] = options[text_option_list[i][0]]
