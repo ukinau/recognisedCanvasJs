@@ -42,6 +42,7 @@ Pallet.prototype.find_object = function(key, value){
   
 **/
 Pallet.prototype._sort_object_by_z = function(){
+  var startTime = Date.now()
   this.draw_objects_z_map = {}
   for(var i = 0;i<this.draw_objects.length; i++){
     this.draw_objects[i].calculate()
@@ -67,6 +68,7 @@ Pallet.prototype._get_sorted_zindex_list = function(){
 }
 
 Pallet.prototype.render = function(){
+  var startTime = Date.now()
   this.ctx.clearRect(0, 0, this.canvas_dom.width, this.canvas_dom.height)
   this._sort_object_by_z()
   var z_list = this._get_sorted_zindex_list()
@@ -76,6 +78,7 @@ Pallet.prototype.render = function(){
       this.draw_objects_z_map[z][j].canvas.draw(this.ctx)
     }
   }
+  console.log('render', (Date.now()-startTime)/1000)
 }
 
 Pallet.prototype.setMouseEventToDocument = function(_document){
@@ -102,6 +105,7 @@ Pallet.prototype.getMouseUpEventHandler = function(){
 Pallet.prototype.genMouseEventHandler = function(eventName){
   var _this = this
   var callback = function(e){
+    var startTime = Date.now()
     var rect = e.target.getBoundingClientRect(); 
     var x = e.clientX - rect.left;
     var y = e.clientY - rect.top;
@@ -146,6 +150,7 @@ Pallet.prototype.genMouseEventHandler = function(eventName){
         }
       }
     }
+    console.log('find.event', (Date.now()-startTime)/1000)
   }
   return callback
 }
