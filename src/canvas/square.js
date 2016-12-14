@@ -40,7 +40,7 @@ SquareWithTitle.prototype.calculate = function(){
       //Texbox possitionY is based on the bottom of chaacter
       //    ----- <- not possitionY
       //      |
-      //      | <- possitonY 
+      //      | <- possitonY
       m_top = this.title.get_px_height()
   }else if(this.title_vertical_align == 'center'){
       m_top = (this.height - this.title.get_px_height())/2
@@ -79,7 +79,7 @@ SquareWithTitle.prototype.draw = function(ctx){
                        this.possitionX+this.width-this.radius,
                        this.possitionY+this.height);
   ctx.lineTo(this.possitionX+this.radius, this.possitionY+this.height);
-  ctx.quadraticCurveTo(this.possitionX, this.possitionY+this.height, 
+  ctx.quadraticCurveTo(this.possitionX, this.possitionY+this.height,
                        this.possitionX, this.possitionY+this.height-this.radius);
   ctx.lineTo(this.possitionX, this.possitionY+this.radius);
   ctx.quadraticCurveTo(this.possitionX, this.possitionY,
@@ -91,7 +91,7 @@ SquareWithTitle.prototype.draw = function(ctx){
   ctx.globalAlpha = 1.0
   this.calculate()
   this.title.draw(ctx)
-  ctx.globalAlpha = tmp_globalAlpha 
+  ctx.globalAlpha = tmp_globalAlpha
   ctx.lineWidth = tmp_lineWidth
   ctx.fillStyle = tmp_fillStyle
   ctx.strokeStyle = tmp_strokeStyle
@@ -176,9 +176,43 @@ TextboxSquare.prototype.calculate_turned_text = function(){
 
   var temp_font = this.ctx.font
   this.ctx.font = this.text.font
-
+  var color_metatag = "<color>"
+  var font_metatag = "<font>"
+  var color_info = null
+  var font_info = null
   for(var i=0; i<this.text.content.length; i++){
     var chara = this.text.content.charAt(i)
+    if(chara == '<'){
+      candidate = ''
+      for(var j = i; j<this.text.content.length; j++){
+        candidate += this.text.content.charAt(j)
+        if(this.text.content.charAt(j)==">"){
+          break
+        }else if(j == j + color_metatag.length-1){
+          break
+        }
+      }
+      if(candidate == color_metatag){
+        next_start = j+2 //<color>
+        color_info = ""
+        for(var j = next_start; j<this.text.content.length; j++){
+          if(this.text.content.charAt(j) == ")"){break}
+          color_info += this.text.content.charAt(j)
+        }
+      } else if (candidate == font_metatag){
+        next_start = j+2 //<font>()
+        font_info = ""
+        for(var j = next_start; j<this.text.content.length; j++){
+          if(this.text.content.charAt(j) == ")"){break}
+          font_info += this.text.content.charAt(j)
+        }
+      }
+      if(color_info || font_info){
+        i = j + 1
+        chara = this.text.content.charAt(i)
+      }
+    }
+
     if(chara == '\n'){
       this.lines++
       this.text_turned[this.lines] = this.create_copy_of(this.text, "")
@@ -188,6 +222,14 @@ TextboxSquare.prototype.calculate_turned_text = function(){
       this.text_turned[this.lines] = this.create_copy_of(this.text, "")
     }
     this.text_turned[this.lines].content += chara
+    if(color_info){
+      this.text_turned[this.lines].color = color_info
+      color_info = null
+    }
+    if(font_info){
+      this.text_turned[this.lines].font = font_info
+      font_info = null
+    }
   }
   this.ctx.font = temp_font
 }

@@ -86,7 +86,7 @@
           pallet.render()
           moveStart(_this, eventName, _)
         }
-      
+
         function connectionUnHighLight(_this, eventName, _){
           var connections = _this.connections
           for(var i=0; i<connections.length; i++){
@@ -113,12 +113,13 @@
           _this['originalCordinate'] = [_this.canvas.possitionX, _this.canvas.possitionY]
         }
 
-        var text_desc = 'This is sample:\nThe text field calls this method whenever the user taps the return button. You can use this method to implement any custom behavior when the button is tapped. For example, if you want to dismiss the keyboard when the user taps the return button, your implementation can call the resignFirstResponder( method. )'
+        var text_desc = '\n<font>(30px sans-serif)This is sample:\n\n\nThe text field calls this method whenever the user taps the return button. You can use this method to implement any custom behavior when the button is tapped. For example, if you want to dismiss the keyboard when the user taps the return button, your implementation can call the resignFirstResponder( method. )' + '\n<color>(#d31c16) we can change color'
+
         var textbox =  new TextboxSquare(ctx, text_desc)
         textbox.possitionX = 200
         textbox.possitionY = 400
         textbox.width = 300
-        textbox.height = 200
+        textbox.height = 400
         textbox.color = "rgb(250, 250, 250)"
         textbox.globalAlpha = 0.8
         textbox.text.font = "15px sans-serif"
