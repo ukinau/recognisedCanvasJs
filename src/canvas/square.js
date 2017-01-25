@@ -165,8 +165,23 @@ TextboxSquare.prototype.calculate = function(){
   this.text.possitionY = this.possitionY + this.text_init_margin_top
   this.text.z_index = this.z_index
   this.calculate_turned_text()
-  for(var i=0; i<this.text_turned.length; i++){
-    this.text_turned[i].possitionY += this.text_turned[i].get_px_height() * i
+  var lines = 0
+  var height = 0
+  for(var i=1; i<this.text_turned.length; i++){
+    if(this.text_turned[i].returned){
+      this.text_turned[i].possitionY = this.text_turned[i-1].get_px_height() + this.text_turned[i-1].possitionY
+    }else{
+      this.text_turned[i].possitionY = this.text_turned[i-1].possitionY
+      tmp_font = this.ctx.font
+      this.ctx.font = this.text_turned[i].font
+      str = ""
+      for(var j=1;j<this.text_turned.length; j++){
+        if(this.text_turned[i-j].returned){break}
+        str += this.text_turned[i-j].content
+      }
+      this.text_turned[i].possitionX += this.ctx.measureText(str).width
+      this.ctx.font = tmp_font
+    }
   }
 }
 
@@ -176,60 +191,60 @@ TextboxSquare.prototype.calculate_turned_text = function(){
 
   var temp_font = this.ctx.font
   this.ctx.font = this.text.font
-  var color_metatag = "<color>"
-  var font_metatag = "<font>"
-  var color_info = null
-  var font_info = null
+  var color_stack = [this.text_turned[0].color]
+  var font_stack = [this.text_turned[0].font]
+  var previous_not_returned_line = ""
+
   for(var i=0; i<this.text.content.length; i++){
     var chara = this.text.content.charAt(i)
+    parsed = false
     if(chara == '<'){
-      candidate = ''
-      for(var j = i; j<this.text.content.length; j++){
-        candidate += this.text.content.charAt(j)
-        if(this.text.content.charAt(j)==">"){
-          break
-        }else if(j == j + color_metatag.length-1){
-          break
+      parsed = get_metacode(this.text.content, i)
+      if(parsed.found){
+        switch(parsed.value.name){
+          case "color":
+            if(parsed.value.eot){color_stack.pop()}
+            else{color_stack.push(parsed.value.value)}
+            break
+          case "font":
+            if(parsed.value.eot){font_stack.pop()}
+            else{font_stack.push(parsed.value.value)}
+            break
         }
-      }
-      if(candidate == color_metatag){
-        next_start = j+2 //<color>
-        color_info = ""
-        for(var j = next_start; j<this.text.content.length; j++){
-          if(this.text.content.charAt(j) == ")"){break}
-          color_info += this.text.content.charAt(j)
-        }
-      } else if (candidate == font_metatag){
-        next_start = j+2 //<font>()
-        font_info = ""
-        for(var j = next_start; j<this.text.content.length; j++){
-          if(this.text.content.charAt(j) == ")"){break}
-          font_info += this.text.content.charAt(j)
-        }
-      }
-      if(color_info || font_info){
-        i = j + 1
-        chara = this.text.content.charAt(i)
+        i = parsed.value.next_char - 1
       }
     }
 
+    if(parsed && parsed.found){
+      this.lines++
+      this.text_turned[this.lines] = this.create_copy_of(this.text, "")
+      this.text_turned[this.lines].color = color_stack[color_stack.length-1]
+      this.text_turned[this.lines].font = font_stack[font_stack.length-1]
+      continue
+    }
+
     if(chara == '\n'){
+      this.text_turned[this.lines].returned = true
       this.lines++
       this.text_turned[this.lines] = this.create_copy_of(this.text, "")
     }
-    if(this.ctx.measureText(this.text_turned[this.lines].content + chara).width > this.width - this.text_margin_left*2){
-      this.lines++
-      this.text_turned[this.lines] = this.create_copy_of(this.text, "")
+    previous_not_returned_line = ""
+    for(var j=1; j<this.lines.length; j++){
+      if(this.lines==0){break}
+      if(this.text_turned[this.lines-j].returned){break}
+      previous_not_returned_line += this.text_turned[this.lines-j].content
     }
+
+    if(this.ctx.measureText(previous_not_returned_line + this.text_turned[this.lines].content + chara).width > this.width - this.text_margin_left*2){
+        this.text_turned[this.lines].returned = true
+        this.lines++
+        this.text_turned[this.lines] = this.create_copy_of(this.text, "")
+    }
+
     this.text_turned[this.lines].content += chara
-    if(color_info){
-      this.text_turned[this.lines].color = color_info
-      color_info = null
-    }
-    if(font_info){
-      this.text_turned[this.lines].font = font_info
-      font_info = null
-    }
+    this.text_turned[this.lines].color = color_stack[color_stack.length-1]
+    this.text_turned[this.lines].font = font_stack[font_stack.length-1]
+    this.ctx.font = this.text_turned[this.lines].font
   }
   this.ctx.font = temp_font
 }

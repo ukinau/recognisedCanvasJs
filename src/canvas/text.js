@@ -34,7 +34,6 @@ TextCanvasModel.prototype.draw = function(ctx){
 TextCanvasModel.prototype.get_px_width = function(){
   return (Number(this.font.match(/([0-9].)px/)[1])/1.7) * this.content.length
 }
-//TODO
 TextCanvasModel.prototype.get_px_height = function(){
   return Number(this.font.match(/([0-9].)px/)[1])
 }

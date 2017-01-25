@@ -107,3 +107,62 @@ function randomNum(from, to){
   var range = to - from
   return from + Math.random() * range
 }
+
+/**
+
+**/
+function get_metacode(content, current_pointer){
+  var color_info = null
+  var font_info = null
+  var color_metatag = "<color>"
+  var end_color_metatg = "</color>"
+  var font_metatag = "<font>"
+  var end_font_metatg = "</font>"
+  result = {"found": false, "value": {}}
+
+  candidate = ''
+  for(var j = current_pointer; j<content.length; j++){
+    candidate += content.charAt(j)
+    if(content.charAt(j)==">"){break}
+    else if(j == j + 20){break}
+  }
+  switch(candidate){
+    case color_metatag:
+                        //     j j+1 j+2
+      next_start = j+2 //<color>  (   #
+      color_info = ""
+      for(var j = next_start; j<content.length; j++){
+        if(content.charAt(j) == ")"){break}
+        color_info += content.charAt(j)
+      }
+      break
+    case font_metatag:
+                        //     j j+1 j+2
+      next_start = j+2 //<font>   (  something
+      font_info = ""
+      for(var j = next_start; j<content.length; j++){
+        if(content.charAt(j) == ")"){break}
+        font_info += content.charAt(j)
+      }
+      break
+    case end_color_metatg:
+      result.found = true;
+      result.value = {'name': 'color', 'next_char': j+1, 'eot': true}
+      break
+    case end_font_metatg:
+      result.found = true;
+      result.value = {'name': 'font', 'next_char': j+1, 'eot': true}
+      break
+  }
+
+  if(color_info){
+    result.found = true
+    result.value = {'name': 'color', 'value': color_info, 'next_char': j+1,
+                    'eot': false}
+  }else if (font_info){
+    result.found = true
+    result.value = {'name': 'font', 'value': font_info, 'next_char': j+1,
+                    'eot': false}
+  }
+  return result
+}
