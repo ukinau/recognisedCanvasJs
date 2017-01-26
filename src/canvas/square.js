@@ -168,8 +168,8 @@ TextboxSquare.prototype.calculate = function(){
   var lines = 0
   var height = 0
   for(var i=1; i<this.text_turned.length; i++){
-    if(this.text_turned[i].returned){
-      this.text_turned[i].possitionY = this.text_turned[i-1].get_px_height() + this.text_turned[i-1].possitionY
+    if(this.text_turned[i-1].returned){
+      this.text_turned[i].possitionY = this.text_turned[i].get_px_height() + this.text_turned[i-1].possitionY
     }else{
       this.text_turned[i].possitionY = this.text_turned[i-1].possitionY
       tmp_font = this.ctx.font
