@@ -1117,8 +1117,8 @@ Pallet.prototype.genMouseEventHandler = function(eventName){
     var rect = e.target.getBoundingClientRect(); 
     var x = e.clientX - rect.left;
     var y = e.clientY - rect.top;
-    x = x / this.scale
-    y = y / this.scale
+    x = x / _this.scale
+    y = y / _this.scale
     var event_info = {'x': x, 'y': y}
     var deteced = {}
     if(eventName=='mousemove' && _this.event_object['dragging']){
