@@ -1005,11 +1005,12 @@ DrawObject.prototype.event_handler = function(eventName, event_info){
 DrawObject.prototype.event_function_register = function(eventName, event_function){
   this.event_functions[eventName] = event_function
 }
-;var Pallet = function(ctx, canvas_dom){
+;var Pallet = function(ctx, canvas_dom, scale){
   this.canvas_dom = canvas_dom
   this.ctx = ctx
   this.draw_objects = []
   this.draw_objects_z_map = {}
+  this.scale = scale
   this.event_object = {
     "mousedown": null, //selected object with highest z_index
     "mousemove": null, //selected object with highest z_index
@@ -1116,6 +1117,8 @@ Pallet.prototype.genMouseEventHandler = function(eventName){
     var rect = e.target.getBoundingClientRect(); 
     var x = e.clientX - rect.left;
     var y = e.clientY - rect.top;
+    x = x / this.scale
+    y = y / this.scale
     var event_info = {'x': x, 'y': y}
     var deteced = {}
     if(eventName=='mousemove' && _this.event_object['dragging']){
